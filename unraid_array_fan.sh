@@ -86,23 +86,18 @@ OUTPUT+="Linear PWM Range is "$FAN_LOW_PWM" to "$FAN_HIGH_PWM" in "$NUM_STEPS" i
 # If all are spun down then high temp will be set to 0.
 while [ "$CURRENT_DRIVE" -le "$NUM_OF_DRIVES" ]
 do
-  SLEEPING='hdparm -C ${HD[$CURRENT_DRIVE]} | grep -c standby'
+  SLEEPING=$(hdparm -C ${HD[$CURRENT_DRIVE]} | grep -c standby)
   if [ "$SLEEPING" == "0" ]; then
-    CURRENT_TEMP="smartctl -A ${HD[$CURRENT_DRIVE]} | grep -m 1 -i Temperature_Celsius | awk '{print \$10}'"
+    CURRENT_TEMP=$(smartctl -A ${HD[$CURRENT_DRIVE]} | grep -m 1 -i Temperature_Celsius | awk '{print $10}')
     OUTPUT+=" -- Drive "${HD[$CURRENT_DRIVE]}" temp "$CURRENT_TEMP$'\n'
     if [ "$HIGHEST_TEMP" -le "$CURRENT_TEMP" ]; then
       HIGHEST_TEMP=$CURRENT_TEMP
     fi
   fi
-#echo $CURRENT_TEMP
+ #echo $CURRENT_TEMP
   let "CURRENT_DRIVE+=1"
 done
 OUTPUT+="Highest temp is: "$HIGHEST_TEMP$'\n'
-
-# Enable speed change on this fan if not already
-if [ "$ARRAY_FAN" != "1" ]; then
-  echo 1 > "${ARRAY_FAN}_enable"
-fi
 
 # previous speed
 PREVIOUS_SPEED=$(cat $ARRAY_FAN)
@@ -137,5 +132,4 @@ if [ "$PREVIOUS_SPEED" -ne "$CURRENT_SPEED" ]; then
 else
   echo "Fan speed unchanged. Highest temp: "$HIGHEST_TEMP" Current pwm: "$CURRENT_SPEED
 fi
-# Command for testing script
-#bash '/boot/config/plugins/user.scripts/scripts/unraid array fan/script'
+# bash '/tmp/user.scripts/tmpScripts/unraid array fan/script'
