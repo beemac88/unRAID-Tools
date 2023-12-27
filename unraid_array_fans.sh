@@ -46,7 +46,7 @@ HD[8]=/dev/sdj
 
 # Temperatures to change fan speed at
 # Any temp between OFF and HIGH will cause fan to run on low speed setting 
-FAN_OFF_TEMP=30     # Anything this number and below - fan is off
+FAN_OFF_TEMP=28     # Anything this number and below - fan is off
 FAN_HIGH_TEMP=42    # Anything this number or above - fan is high speed
 
 # Fan speed settings. Run pwmconfig (part of the lm_sensors package) to determine 
