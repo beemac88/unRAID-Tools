@@ -57,7 +57,7 @@ FAN_HIGH_TEMP=42    # Anything this number or above - fan is high speed
 # Any real number between 0 and 255.
 #
 FAN_OFF_PWM=0
-FAN_LOW_PWM=30
+FAN_LOW_PWM=27
 FAN_START_PWM=255
 FAN_HIGH_PWM=255
 
