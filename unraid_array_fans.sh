@@ -8,6 +8,7 @@
 #        was returning two numbers with just "Temperature".
 # v0.5: By Pauven:  Added linear PWM logic to slowly ramp speed when fan is between HIGH and OFF.
 # v0.6: By kmwoley: Added fan start speed. Added logging, suppressed unless fan speed is changed.
+# v0.7: By beemac88: Tailored for my specific unRAID setup with one SATA SSD (sdb), 8 drives active, and three array fans.
 # A simple script to check for the highest hard disk temperatures in an array
 # or backplane and then set the fan to an apropriate speed. Fan needs to be connected
 # to motherboard with pwm support, not array.
