@@ -45,8 +45,8 @@ HD[8]=/dev/sdj
 
 # Temperatures to change fan speed at
 # Any temp between OFF and HIGH will cause fan to run on low speed setting 
-FAN_OFF_TEMP=35     # Anything this number and below - fan is off
-FAN_HIGH_TEMP=45    # Anything this number or above - fan is high speed
+FAN_OFF_TEMP=30     # Anything this number and below - fan is off
+FAN_HIGH_TEMP=42    # Anything this number or above - fan is high speed
 
 # Fan speed settings. Run pwmconfig (part of the lm_sensors package) to determine 
 # what numbers you want to use for your fan pwm settings. Should not need to
@@ -56,7 +56,7 @@ FAN_HIGH_TEMP=45    # Anything this number or above - fan is high speed
 # Any real number between 0 and 255.
 #
 FAN_OFF_PWM=0
-FAN_LOW_PWM=100
+FAN_LOW_PWM=30
 FAN_START_PWM=255
 FAN_HIGH_PWM=255
 
@@ -66,7 +66,11 @@ FAN_HIGH_PWM=255
 # there is no fan connected or motherboard can't read rpm of fan.
 # ARRAY_FAN=/sys/class/hwmon/hwmon1/device/pwm2
 ARRAY_FAN=/sys/class/hwmon/hwmon2/pwm2
-
+ARRAY_FAN2=/sys/class/hwmon/hwmon2/pwm3
+ARRAY_FAN3=/sys/class/hwmon/hwmon2/pwm4
+ARRAY_FAN_RPM=/sys/class/hwmon/hwmon2/fan2_input
+ARRAY_FAN2_RPM=/sys/class/hwmon/hwmon2/fan3_input
+ARRAY_FAN3_RPM=/sys/class/hwmon/hwmon2/fan4_input
 ### END USER SET VARIABLES ###
 
 
@@ -99,6 +103,18 @@ do
 done
 OUTPUT+="Highest temp is: "$HIGHEST_TEMP$'\n'
 
+# Enable speed change on 1st fan if not already
+if [ "$ARRAY_FAN" != "1" ]; then
+  echo 1 > "${ARRAY_FAN}_enable"
+fi
+# Enable speed change on 2nd fan if not already
+if [ "$ARRAY_FAN2" != "1" ]; then
+  echo 1 > "${ARRAY_FAN2}_enable"
+fi
+# Enable speed change on 3rd fan if not already
+if [ "$ARRAY_FAN" != "1" ]; then
+  echo 1 > "${ARRAY_FAN3}_enable"
+fi
 # previous speed
 PREVIOUS_SPEED=$(cat $ARRAY_FAN)
 
@@ -106,30 +122,40 @@ PREVIOUS_SPEED=$(cat $ARRAY_FAN)
 if [ "$HIGHEST_TEMP" -le "$FAN_OFF_TEMP" ]; then
   # set fan to off
   echo $FAN_OFF_PWM  > $ARRAY_FAN
+  echo $FAN_OFF_PWM  > $ARRAY_FAN2
+  echo $FAN_OFF_PWM  > $ARRAY_FAN3
   OUTPUT+="Setting pwm to: "$FAN_OFF_PWM$'\n'
 elif [ "$HIGHEST_TEMP" -ge "$FAN_HIGH_TEMP" ]; then
   # set fan to full speed
   echo $FAN_HIGH_PWM > $ARRAY_FAN
+  echo $FAN_HIGH_PWM > $ARRAY_FAN2
+  echo $FAN_HIGH_PWM > $ARRAY_FAN3
   OUTPUT+="Setting pwm to: "$FAN_HIGH_PWM$'\n'
 else
   # set fan to starting speed first to make sure it spins up then change it to low setting.
-  if [ "$PREVIOUS_SPEED" -lt "$FAN_START_PWM" ]; then
-    echo $FAN_START_PWM > $ARRAY_FAN
-      sleep 4
-  fi
+#  if [ "$PREVIOUS_SPEED" -lt "$FAN_START_PWM" ]; then
+#    echo $FAN_START_PWM > $ARRAY_FAN
+#    echo $FAN_START_PWM > $ARRAY_FAN2
+#    echo $FAN_START_PWM > $ARRAY_FAN3
+#      sleep 4
+#  fi
   # Calculate target fan PWM speed as a linear value between FAN_HIGH_PWM and FAN_LOW_PWM
   FAN_LINEAR_PWM=$(( ((HIGHEST_TEMP - FAN_OFF_TEMP - 1) * PWM_INCREMENT) + FAN_LOW_PWM))
   echo $FAN_LINEAR_PWM > $ARRAY_FAN
+  echo $FAN_LINEAR_PWM > $ARRAY_FAN2
+  echo $FAN_LINEAR_PWM > $ARRAY_FAN3
   OUTPUT+="Setting pwm to: "$FAN_LINEAR_PWM$'\n'
 fi
 
 
 # produce output if the fan speed was changed
 CURRENT_SPEED=$(cat $ARRAY_FAN)
+CURRENT_SPEED2=$(cat $ARRAY_FAN2)
+CURRENT_SPEED3=$(cat $ARRAY_FAN3)
 if [ "$PREVIOUS_SPEED" -ne "$CURRENT_SPEED" ]; then
-  echo "Fan speed has changed."
+  echo "Array fan speed has changed."
   echo "${OUTPUT}"
 else
-  echo "Fan speed unchanged. Highest temp: "$HIGHEST_TEMP" Current pwm: "$CURRENT_SPEED
+  echo "Hottest HDD: "$HIGHEST_TEMP", FAN2 "$(cat $ARRAY_FAN_RPM)", FAN3 "$(cat $ARRAY_FAN2_RPM)", FAN4 "$(cat $ARRAY_FAN3_RPM)
 fi
 # bash '/tmp/user.scripts/tmpScripts/unraid array fan/script'
