@@ -66,12 +66,12 @@ FAN_HIGH_PWM=255
 # or fan2_input and so on to see the current rpm of the fan. If 0 then fan is off or 
 # there is no fan connected or motherboard can't read rpm of fan.
 # ARRAY_FAN=/sys/class/hwmon/hwmon1/device/pwm2
-ARRAY_FAN=/sys/class/hwmon/hwmon2/pwm2
-ARRAY_FAN2=/sys/class/hwmon/hwmon2/pwm3
-ARRAY_FAN3=/sys/class/hwmon/hwmon2/pwm4
-ARRAY_FAN_RPM=/sys/class/hwmon/hwmon2/fan2_input
-ARRAY_FAN2_RPM=/sys/class/hwmon/hwmon2/fan3_input
-ARRAY_FAN3_RPM=/sys/class/hwmon/hwmon2/fan4_input
+ARRAY_FAN=/sys/class/hwmon/hwmon3/pwm1
+ARRAY_FAN2=/sys/class/hwmon/hwmon3/pwm2
+ARRAY_FAN3=/sys/class/hwmon/hwmon3/pwm3
+ARRAY_FAN_RPM=/sys/class/hwmon/hwmon3/fan1_input
+ARRAY_FAN2_RPM=/sys/class/hwmon/hwmon3/fan2_input
+ARRAY_FAN3_RPM=/sys/class/hwmon/hwmon3/fan3_input
 ### END USER SET VARIABLES ###
 
 
@@ -157,6 +157,6 @@ if [ "$PREVIOUS_SPEED" -ne "$CURRENT_SPEED" ]; then
   echo "Array fan speed has changed."
   echo "${OUTPUT}"
 else
-  echo "Hottest HDD: "$HIGHEST_TEMP", FAN2 "$(cat $ARRAY_FAN_RPM)", FAN3 "$(cat $ARRAY_FAN2_RPM)", FAN4 "$(cat $ARRAY_FAN3_RPM)
+  echo "Hottest HDD: "$HIGHEST_TEMP", FAN2 "$(cat $ARRAY_FAN)", FAN3 "$(cat $ARRAY_FAN2)", FAN4 "$(cat $ARRAY_FAN3)
 fi
 # bash '/tmp/user.scripts/tmpScripts/unraid array fan/script'
