@@ -9,6 +9,7 @@
 # v0.5: By Pauven:  Added linear PWM logic to slowly ramp speed when fan is between HIGH and OFF.
 # v0.6: By kmwoley: Added fan start speed. Added logging, suppressed unless fan speed is changed.
 # v0.7: By beemac88: Tailored for my specific unRAID setup with one SATA SSD (sdb), 8 drives active, and three array fans.
+# v0.8: by beemac88: Added Discord Webhook URL, and (currently commented out) Fan stoppage check + Discord notification sections.
 # A simple script to check for the highest hard disk temperatures in an array
 # or backplane and then set the fan to an apropriate speed. Fan needs to be connected
 # to motherboard with pwm support, not array.
@@ -17,6 +18,9 @@
 ### VARIABLES FOR USER TO SET ###
 # Amount of drives in the array. Make sure it matches the amount you filled out below.
 NUM_OF_DRIVES=8
+
+# Discord webhook URL for notifications
+DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/YOUR_DISCORD_WEBHOOK_URL"
 
 # unRAID drives that are in the array/backplane of the fan we need to control
 HD[1]=/dev/sdc
@@ -74,7 +78,6 @@ ARRAY_FAN2_RPM=/sys/class/hwmon/hwmon3/fan2_input
 ARRAY_FAN3_RPM=/sys/class/hwmon/hwmon3/fan3_input
 ### END USER SET VARIABLES ###
 
-
 # Program variables - do not modify
 HIGHEST_TEMP=0
 CURRENT_DRIVE=1
@@ -85,7 +88,6 @@ OUTPUT=""
 NUM_STEPS=$((FAN_HIGH_TEMP - FAN_OFF_TEMP - 1))
 PWM_INCREMENT=$(( (FAN_HIGH_PWM - FAN_LOW_PWM) / NUM_STEPS))
 OUTPUT+="Linear PWM Range is "$FAN_LOW_PWM" to "$FAN_HIGH_PWM" in "$NUM_STEPS" increments of "$PWM_INCREMENT$'\n'
-
 
 # while loop to get the highest temperature of active drives. 
 # If all are spun down then high temp will be set to 0.
@@ -118,6 +120,18 @@ if [ "$ARRAY_FAN" != "1" ]; then
 fi
 # previous speed
 PREVIOUS_SPEED=$(cat $ARRAY_FAN)
+
+: '
+# Fan stoppage check (RPM == 0)
+FAN1_RPM=$(cat $ARRAY_FAN_RPM)
+FAN2_RPM=$(cat $ARRAY_FAN2_RPM)
+FAN3_RPM=$(cat $ARRAY_FAN3_RPM)
+
+# If any fan RPM is 0, send a notification to Discord
+if [[ "$FAN1_RPM" -eq "0" || "$FAN2_RPM" -eq "0" || "$FAN3_RPM" -eq "0" ]]; then
+  curl -X POST -H "Content-Type: application/json" -d '{"content":"Warning: One or more array fans have stopped!"}' $DISCORD_WEBHOOK_URL
+fi
+'
 
 # Set the fan speed based on highest temperature
 if [ "$HIGHEST_TEMP" -le "$FAN_OFF_TEMP" ]; then
