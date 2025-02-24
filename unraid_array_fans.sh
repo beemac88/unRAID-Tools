@@ -173,4 +173,13 @@ if [ "$PREVIOUS_SPEED" -ne "$CURRENT_SPEED" ]; then
 else
   echo "Hottest HDD: "$HIGHEST_TEMP", FAN2 "$(cat $ARRAY_FAN)", FAN3 "$(cat $ARRAY_FAN2)", FAN4 "$(cat $ARRAY_FAN3)
 fi
+
+if [ "$(cat $ARRAY_FAN_RPM)" -lt 500 ] || [ "$(cat $ARRAY_FAN2_RPM)" -lt 500 ] || [ "$(cat $ARRAY_FAN3_RPM)" -lt 500 ]; then
+    MESSAGE="⚠️ ALERT: One or more array fans have dropped below 500 RPM!\nFan1: $(cat $ARRAY_FAN_RPM) RPM, Fan2: $(cat $ARRAY_FAN2_RPM) RPM, Fan3: $(cat $ARRAY_FAN3_RPM) RPM."
+    echo "$MESSAGE"
+
+    # Send an alert notification to unRAID webGUI
+    /usr/local/emhttp/webGui/scripts/notify -i alert -s "Array Fan Failure" -d "$MESSAGE"
+fi
+
 # bash '/tmp/user.scripts/tmpScripts/unraid array fan/script'
