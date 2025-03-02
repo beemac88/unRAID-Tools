@@ -182,4 +182,15 @@ if [ "$(cat $ARRAY_FAN_RPM)" -lt 500 ] || [ "$(cat $ARRAY_FAN2_RPM)" -lt 500 ] |
     /usr/local/emhttp/webGui/scripts/notify -i alert -s "Array Fan Failure" -d "$MESSAGE"
 fi
 
-# bash '/tmp/user.scripts/tmpScripts/unraid array fan/script'
+: <<'EOF'
+
+bash '/tmp/user.scripts/tmpScripts/unraid array fan/script'
+
+modprobe -r k10temp
+modprobe -r it87
+modprobe k10temp
+modprobe it87
+
+/etc/rc.d/rc.nginx reload
+
+EOF
